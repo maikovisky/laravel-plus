@@ -19,7 +19,7 @@ class CrudNewCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'crud:new {Name}';
+    protected $signature = 'crud:new {Name} {tableName}';
     
      /**
      * The console command description.
@@ -56,8 +56,9 @@ class CrudNewCommand extends Command
         $bar = $this->helper->barSetup($this->output->createProgressBar(7));
         $bar->start();
         
-        $Name = $this->argument('Name');
-        $name = strtolower($Name);
+        $Name      = $this->argument('Name');
+        $tableName = $this->argument('tableName');
+        $name      = strtolower($Name);
         
         
         $path = getcwd();
@@ -80,7 +81,7 @@ class CrudNewCommand extends Command
         $this->helper->replaceAndSave(__DIR__.'/stub/app/Repositories/RepositoryEloquent.stub', ['{{Name}}', '{{name}}'], [$Name, $name], $newRepositoryEloquent);
         $bar->advance();
         
-        $columns = Schema::getColumnListing('users');
+        $columns = Schema::getColumnListing($tableName);
         
         
         $this->info('Creating entity...');
