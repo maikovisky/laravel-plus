@@ -1,0 +1,52 @@
+@extends('layouts.default')
+@extends('layouts.table')
+
+
+@section("title")
+<h1>{{Lang::get("general.{{Name}}")}}</h1>
+@stop
+
+@section("sub-title")
+{{Lang::get("general.{{Name}}")}}
+@stop
+
+@section('breadcrumbs', Breadcrumbs::render('{{name}}'))
+
+@section('actions')
+{!!Form::actions(array('new' => route("{{name}}.create")))!!}
+@stop
+
+@section('table')
+@if (count(${{name}}) > 0)
+<table class='table table-striped table-bordered table-hover'>
+    <thead>
+        <tr>
+            <th>{{Lang::get("general.id")}}</th>
+        </tr>
+    </thead>
+    @foreach($modelsensors as $modelsensor) 
+        <tr>
+            <td><a href="{{route('{{name}}.edit', ${{name}}->id)}}">{{${{name}}->id}}</a></td>
+            <td><a href="{{route('{{name}}.edit', ${{name}}->id)}}">{{${{name}}->name}}</a></td>
+        </tr>
+    @endforeach
+</table>
+
+
+@else
+<div class="alert alert-info">
+    {{Lang::get("general.norecordsfound")}}
+</div>
+@endif
+                           
+@stop
+
+@section("script")
+
+$(document).ready(function(){
+    $(document).on('submit', '.delete-form', function(){
+        return confirm("{{Lang::get("general.areyousure")}}");
+    });
+});
+
+@stop

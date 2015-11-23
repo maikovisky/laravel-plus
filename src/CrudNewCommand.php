@@ -33,6 +33,12 @@ class CrudNewCommand extends Command
      */
     protected $helper;
     
+    protected $appPath;
+    protected $resourcePath;
+    protected $bar;
+    protected $patterns = ['{{Name}}', '{{name}}'];
+    protected $patternsValues;
+    protected $crudName;
     
     /**
      * Create a new command instance.
@@ -44,50 +50,49 @@ class CrudNewCommand extends Command
         parent::__construct();
         $this->helper = $helper;
     }
- 
-    /**
-     * Execute the console command.
-     *
-     * @return mixed
-     */
-    public function handle()
+    
+    protected function createController() 
     {
-         // Start the progress bar
-        $bar = $this->helper->barSetup($this->output->createProgressBar(7));
-        $bar->start();
-        
-        $Name      = $this->argument('Name');
-        $tableName = $this->argument('tableName');
-        $name      = strtolower($Name);
-        
-        
-        $path = getcwd();
-        $appPath = $path .'/app/';
-        $controllerPath = $appPath . 'Http/Controllers';
-        $entitiesPath = $appPath . 'Entities';
-        $repositoriesPath = $appPath . 'Repositories';
-        
-        
         $this->info('Creating controller...');
-        $newController = $controllerPath.'/'.$Name.'Controller.php';
-        $this->helper->replaceAndSave(__DIR__.'/stub/app/Http/Controllers/Controller.stub', ['{{Name}}', '{{name}}'], [$Name, $name], $newController);
-        $bar->advance();
+        
+        $controllerPath = $this->appPath . 'Http/Controllers';
+        $newController  = $controllerPath.'/'.$this->crudName.'Controller.php';
+        $this->helper->replaceAndSave(__DIR__.'/stub/app/Http/Controllers/Controller.stub', 
+                $this->patterns,  $this->patternsValues, $newController);
+        
+        $this->bar->advance();
+    }
+    
+    protected function createRepository()
+    {
         
         $this->info('Creating repository...');
+        
+        $repositoriesPath = $this->appPath . 'Repositories';
         $this->helper->makeDir($repositoriesPath);
-        $newRepository = $repositoriesPath.'/'.$Name.'Repository.php';
-        $newRepositoryEloquent = $repositoriesPath.'/'.$Name.'RepositoryEloquent.php';
-        $this->helper->replaceAndSave(__DIR__.'/stub/app/Repositories/Repository.stub', ['{{Name}}', '{{name}}'], [$Name, $name], $newRepository);
-        $this->helper->replaceAndSave(__DIR__.'/stub/app/Repositories/RepositoryEloquent.stub', ['{{Name}}', '{{name}}'], [$Name, $name], $newRepositoryEloquent);
-        $bar->advance();
         
+        $newRepository = $repositoriesPath.'/'.$this->crudName.'Repository.php';
+        $newRepositoryEloquent = $repositoriesPath.'/'.$this->crudName.'RepositoryEloquent.php';
+        
+        $this->helper->replaceAndSave(__DIR__.'/stub/app/Repositories/Repository.stub', 
+                $this->patterns,  $this->patternsValues, $newRepository);
+        $this->helper->replaceAndSave(__DIR__.'/stub/app/Repositories/RepositoryEloquent.stub', 
+                $this->patterns,  $this->patternsValues, $newRepositoryEloquent);
+        
+        $this->bar->advance();
+    }
+
+    protected function createEntity()
+    {
+        $tableName = $this->argument('tableName');
         $columns = Schema::getColumnListing($tableName);
-        
+        $entitiesPath = $this->appPath . 'Entities';
         
         $this->info('Creating entity...');
         $this->helper->makeDir($entitiesPath);
-        $newEntity = $entitiesPath.'/'.$Name.'.php';
-        $this->helper->replaceAndSave(__DIR__.'/stub/app/Entities/Entity.stub', ['{{Name}}', '{{name}}'], [$Name, $name], $newEntity);
+        $newEntity = $entitiesPath.'/'.$this->crudName.'.php';
+        $this->helper->replaceAndSave(__DIR__.'/stub/app/Entities/Entity.stub', 
+                 $this->patterns,  $this->patternsValues, $newEntity);
         
         $columns = array_diff($columns, ['id']);
         
@@ -115,16 +120,56 @@ class CrudNewCommand extends Command
         if(in_array('password', $columns))
         {
             $columns = array_diff($columns, ['remember_token']);
-            $hidden = 'protected $hidden = [\'password\', \'remember_token\'];';
+            $hidden  = 'protected $hidden = [\'password\', \'remember_token\'];';
         }
 
         $fillable = "\$fillable = ['". implode("','",$columns) . "']";
-        $this->info($fillable); 
         $this->helper->replaceAndSave($newEntity, '$fillable', $fillable, $newEntity);
         $this->helper->replaceAndSave($newEntity, '$timestamps = false', $timestamps, $newEntity);
         $this->helper->replaceAndSave($newEntity, 'TransformableTrait', $softDelete, $newEntity);
+        $this->bar->advance();
+    }
+
+    protected function createView()
+    {
+        $this->info('Creating views...');
         
-        dd($columns);
-        $bar->advance();
+        $resourcePath = $this->resourcePath . 'views/' . strtolower($this->crudName);
+        $this->helper->makeDir($resourcePath);
+        $newIndexView = $resourcePath .'/index.blade.php';
+        $newEditView  = $resourcePath .'/edit.blade.php';
+        
+        $this->helper->replaceAndSave(__DIR__.'/stub/resources/views/index.blade.stub', 
+                $this->patterns,  $this->patternsValues, $newIndexView);
+        $this->helper->replaceAndSave(__DIR__.'/stub/resources/views/edit.blade.stub', 
+                $this->patterns,  $this->patternsValues, $newEditView);
+        $this->bar->advance();
+    }
+    
+    /**
+     * Execute the console command.
+     *
+     * @return mixed
+     */
+    public function handle()
+    {
+         // Start the progress bar
+        $this->bar = $this->helper->barSetup($this->output->createProgressBar(4));
+        $this->bar->start();
+        
+        $Name = $this->argument('Name');
+        $name = strtolower($Name);
+        $this->crudName = $Name;
+        
+        $this->patternsValues = [$Name, $name];
+        
+        $this->appPath      = getcwd() .'/app/';
+        $this->resourcePath = getcwd() .'/resources/';
+       
+        $this->createController();
+        $this->createRepository();  
+        $this->createEntity(); 
+        $this->createView();
+        $this->info('Finish...');
     }
 }
