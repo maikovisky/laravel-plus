@@ -33,30 +33,6 @@ class PackagerHelper
     }
 
     /**
-     * Setting custom formatting for the progress bar.
-     *
-     * @param  object $bar Symfony ProgressBar instance
-     *
-     * @return object $bar Symfony ProgressBar instance
-     */
-    public function barSetup($bar)
-    {
-        // the finished part of the bar
-        $bar->setBarCharacter('<comment>=</comment>');
-
-        // the unfinished part of the bar
-        $bar->setEmptyBarCharacter('-');
-
-        // the progress character
-        $bar->setProgressCharacter('>');
-
-        // the 'layout' of the bar
-        $bar->setFormat(' %current%/%max% [%bar%] %percent:3s%% ');
-
-        return $bar;
-    }
-
-    /**
      * Open haystack, find and replace needles, save haystack.
      *
      * @param  string $oldFile The haystack
@@ -188,6 +164,25 @@ class PackagerHelper
     }
     
     
+    public function listDir($source)
+    {
+        $ret = array();
+        
+        if(is_dir($source)) {
+            $dir_handle=opendir($source);
+            while($file=readdir($dir_handle)){
+                if($file!="." && $file!=".."){
+                    if(is_dir($source."/".$file)){
+                        $ret[] = $file;
+                    }
+                }
+            }
+            closedir($dir_handle);
+        }
+        
+        return $ret;
+    }
+    
     /**
      * Copy recursive 
      * @param type $source
@@ -214,4 +209,5 @@ class PackagerHelper
             copy($source, $dest);
         }
     }
+    
 }

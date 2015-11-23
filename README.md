@@ -17,14 +17,21 @@ PSRs you support to avoid any confusion with users and contributors.
 Via Composer
 
 ``` bash
-$ composer require league/:package_name
+$ composer require maikovisky/laravel-plus
 ```
 
 ## Usage
 
-``` php
-$skeleton = new League\Skeleton();
-echo $skeleton->echoPhrase('Hello, League!');
+Installing a layout.
+
+``` bash
+$ php artisian layout:install 
+```
+
+Creating a new CRUD. Create a controller, model, repository and views (index and edit).
+
+``` bash
+$ php artisian crud:new [Name] [tableName]
 ```
 
 ## Change log

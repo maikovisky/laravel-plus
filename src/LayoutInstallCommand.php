@@ -36,7 +36,7 @@ class LayoutInstallCommand extends Command
      * @var object
      */
     protected $helper;
-    
+        
     /**
      * Create a new command instance.
      *
@@ -48,10 +48,18 @@ class LayoutInstallCommand extends Command
         $this->helper = $helper;
     }
     
+
+
     public function handle()
     {
-         
-        $theme = $this->argument('theme');
+                
+        $themesChoices = $this->helper->listDir(__DIR__."/themes/");
+        
+        $theme = $this->choice("Choise theme:", $themesChoices);
+        
+        if(!$this->confirm("Install theme $theme?")) {
+            return;
+        }
         
         $publicPath = getcwd() . '/public';
         $resourcePath = getcwd() .'/resources';
@@ -61,29 +69,27 @@ class LayoutInstallCommand extends Command
             $this->error("Layout '$theme' not exists...");
             return;
         }
-        
+                
         // Start the progress bar
-        $this->bar = $this->helper->barSetup($this->output->createProgressBar(4));
-        $this->bar->start();
+        $this->output->progressStart(4);
         
         $this->helper->rcopy($themesPath.'/public', $publicPath);
-        $this->bar->advance();
+        $this->output->progressAdvance();
         
         $this->helper->makeDir($resourcePath ."/views/errors");
         $this->helper->rcopy($themesPath . '/resources/views/errors', 
                 $resourcePath ."/views/errors");
-        $this->bar->advance();
+        $this->output->progressAdvance();
         
         $this->helper->makeDir($resourcePath ."/views/includes");
         $this->helper->rcopy($themesPath . '/resources/views/includes', 
                 $resourcePath . "/views/includes");
-        $this->bar->advance();
+        $this->output->progressAdvance();
         
         $this->helper->makeDir($resourcePath ."/views/layouts");
         $this->helper->rcopy($themesPath . '/resources/views/layouts', 
                 $resourcePath ."/views/layouts");
-        $this->bar->advance();
-        
+        $this->output->progressAdvance();
         $this->info("Layout $theme copy...");
     }
     

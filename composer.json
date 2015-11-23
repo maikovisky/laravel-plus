@@ -1,17 +1,17 @@
 {
-    "name": "Maikovisky/LaravelPlus",
+    "name": "maikovisky/laravel-plus",
     "description": ":package_description",
     "keywords": [
         "league",
-        ":package_name"
+        "laravel-plus"
     ],
     "homepage": "https://github.com/Maikovisky/LaravelPlus",
     "license": "MIT",
     "authors": [
         {
-            "name": ":author_name",
-            "email": ":author_email",
-            "homepage": ":author_website",
+            "name": "Maiko de Andrade",
+            "email": "maikovisky@gmail.com",
+            "homepage": "http://maikovisky.com",
             "role": "Developer"
         }
     ],

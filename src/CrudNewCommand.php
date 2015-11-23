@@ -51,16 +51,29 @@ class CrudNewCommand extends Command
         $this->helper = $helper;
     }
     
+    public function verifyFileExists($source) 
+    {
+        if(file_exists($source))
+        {
+            return !$this->confirm("File $source exist. Replace file?");
+        }
+        return false;
+    }
+    
     protected function createController() 
     {
         $this->info('Creating controller...');
         
         $controllerPath = $this->appPath . 'Http/Controllers';
         $newController  = $controllerPath.'/'.$this->crudName.'Controller.php';
-        $this->helper->replaceAndSave(__DIR__.'/stub/app/Http/Controllers/Controller.stub', 
-                $this->patterns,  $this->patternsValues, $newController);
         
-        $this->bar->advance();
+        if(!$this->verifyFileExists($newController)) {       
+            $this->helper->replaceAndSave(__DIR__.'/stub/app/Http/Controllers/Controller.stub', 
+                    $this->patterns,  $this->patternsValues, $newController);
+        }
+        
+        $this->output->progressAdvance();
+
     }
     
     protected function createRepository()
@@ -74,12 +87,17 @@ class CrudNewCommand extends Command
         $newRepository = $repositoriesPath.'/'.$this->crudName.'Repository.php';
         $newRepositoryEloquent = $repositoriesPath.'/'.$this->crudName.'RepositoryEloquent.php';
         
-        $this->helper->replaceAndSave(__DIR__.'/stub/app/Repositories/Repository.stub', 
-                $this->patterns,  $this->patternsValues, $newRepository);
-        $this->helper->replaceAndSave(__DIR__.'/stub/app/Repositories/RepositoryEloquent.stub', 
-                $this->patterns,  $this->patternsValues, $newRepositoryEloquent);
+        if(!$this->verifyFileExists($newRepository)) {
+           $this->helper->replaceAndSave(__DIR__.'/stub/app/Repositories/Repository.stub', 
+                    $this->patterns,  $this->patternsValues, $newRepository); 
+        }
         
-        $this->bar->advance();
+        if(!$this->verifyFileExists($newRepositoryEloquent)) {
+            $this->helper->replaceAndSave(__DIR__.'/stub/app/Repositories/RepositoryEloquent.stub', 
+                    $this->patterns,  $this->patternsValues, $newRepositoryEloquent);
+        }
+        
+        $this->output->progressAdvance();
     }
 
     protected function createEntity()
@@ -91,8 +109,6 @@ class CrudNewCommand extends Command
         $this->info('Creating entity...');
         $this->helper->makeDir($entitiesPath);
         $newEntity = $entitiesPath.'/'.$this->crudName.'.php';
-        $this->helper->replaceAndSave(__DIR__.'/stub/app/Entities/Entity.stub', 
-                 $this->patterns,  $this->patternsValues, $newEntity);
         
         $columns = array_diff($columns, ['id']);
         
@@ -124,10 +140,14 @@ class CrudNewCommand extends Command
         }
 
         $fillable = "\$fillable = ['". implode("','",$columns) . "']";
-        $this->helper->replaceAndSave($newEntity, '$fillable', $fillable, $newEntity);
-        $this->helper->replaceAndSave($newEntity, '$timestamps = false', $timestamps, $newEntity);
-        $this->helper->replaceAndSave($newEntity, 'TransformableTrait', $softDelete, $newEntity);
-        $this->bar->advance();
+        if(!$this->verifyFileExists($newEntity)) {
+            $this->helper->replaceAndSave(__DIR__.'/stub/app/Entities/Entity.stub', 
+                 $this->patterns,  $this->patternsValues, $newEntity);
+            $this->helper->replaceAndSave($newEntity, '$fillable', $fillable, $newEntity);
+            $this->helper->replaceAndSave($newEntity, '$timestamps = false', $timestamps, $newEntity);
+            $this->helper->replaceAndSave($newEntity, 'TransformableTrait', $softDelete, $newEntity);
+        }
+        $this->output->progressAdvance();
     }
 
     protected function createView()
@@ -139,11 +159,15 @@ class CrudNewCommand extends Command
         $newIndexView = $resourcePath .'/index.blade.php';
         $newEditView  = $resourcePath .'/edit.blade.php';
         
-        $this->helper->replaceAndSave(__DIR__.'/stub/resources/views/index.blade.stub', 
-                $this->patterns,  $this->patternsValues, $newIndexView);
-        $this->helper->replaceAndSave(__DIR__.'/stub/resources/views/edit.blade.stub', 
-                $this->patterns,  $this->patternsValues, $newEditView);
-        $this->bar->advance();
+        if(!$this->verifyFileExists($newIndexView)) {
+            $this->helper->replaceAndSave(__DIR__.'/stub/resources/views/index.blade.stub', 
+                    $this->patterns,  $this->patternsValues, $newIndexView);
+        }
+        if(!$this->verifyFileExists($newEditView)) {
+            $this->helper->replaceAndSave(__DIR__.'/stub/resources/views/edit.blade.stub', 
+                    $this->patterns,  $this->patternsValues, $newEditView);
+        }
+        $this->output->progressAdvance();
     }
     
     /**
@@ -154,8 +178,7 @@ class CrudNewCommand extends Command
     public function handle()
     {
          // Start the progress bar
-        $this->bar = $this->helper->barSetup($this->output->createProgressBar(4));
-        $this->bar->start();
+        $this->output->progressStart(4);
         
         $Name = $this->argument('Name');
         $name = strtolower($Name);
