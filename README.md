@@ -19,6 +19,18 @@ Via Composer
 $ composer require maikovisky/laravel-plus
 ```
 
+### Edit config/app.php
+
+``` php
+'providers' => [
+    ...
+    Maikovisky\LaravelPlus\LaravelPlusServiceProvider::class,
+    Prettus\Repository\Providers\RepositoryServiceProvider::class,
+    DaveJamesMiller\Breadcrumbs\ServiceProvider::class,
+],
+```
+
+
 ## Usage
 
 Installing a layout.
@@ -49,7 +61,7 @@ Please see [CONTRIBUTING](CONTRIBUTING.md) and [CONDUCT](CONDUCT.md) for details
 
 ## Security
 
-If you discover any security related issues, please email :author_email instead of using the issue tracker.
+If you discover any security related issues, please email maikovisky@gmail.com instead of using the issue tracker.
 
 ## Credits
 
@@ -60,17 +72,17 @@ If you discover any security related issues, please email :author_email instead 
 
 The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
 
-[ico-version]: https://img.shields.io/packagist/v/league/maikovisky/laravel-plus.svg?style=flat-square
+[ico-version]: https://img.shields.io/packagist/v/maikovisky/laravel-plus.svg?style=flat-square
 [ico-license]: https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square
-[ico-travis]: https://img.shields.io/travis/thephpleague/maikovisky/laravel-plus/master.svg?style=flat-square
-[ico-scrutinizer]: https://img.shields.io/scrutinizer/coverage/g/thephpleague/maikovisky/laravel-plus.svg?style=flat-square
-[ico-code-quality]: https://img.shields.io/scrutinizer/g/thephpleague/maikovisky/laravel-plus.svg?style=flat-square
-[ico-downloads]: https://img.shields.io/packagist/dt/league/maikovisky/laravel-plus.svg?style=flat-square
+[ico-travis]: https://img.shields.io/travis/maikovisky/laravel-plus/master.svg?style=flat-square
+[ico-scrutinizer]: https://img.shields.io/scrutinizer/coverage/g/maikovisky/laravel-plus.svg?style=flat-square
+[ico-code-quality]: https://img.shields.io/scrutinizer/g/maikovisky/laravel-plus.svg?style=flat-square
+[ico-downloads]: https://img.shields.io/packagist/dt/maikovisky/laravel-plus.svg?style=flat-square
 
 [link-packagist]: https://packagist.org/packages/maikovisky/laravel-plus
-[link-travis]: https://travis-ci.org/thephpleague/maikovisky/laravel-plus
-[link-scrutinizer]: https://scrutinizer-ci.com/g/thephpleague/maikovisky/laravel-plus/code-structure
-[link-code-quality]: https://scrutinizer-ci.com/g/thephpleague/maikovisky/laravel-plus
-[link-downloads]: https://packagist.org/packages/league/maikovisky/laravel-plus
+[link-travis]: https://travis-ci.org/maikovisky/laravel-plus
+[link-scrutinizer]: https://scrutinizer-ci.com/g/maikovisky/laravel-plus/code-structure
+[link-code-quality]: https://scrutinizer-ci.com/g/maikovisky/laravel-plus
+[link-downloads]: https://packagist.org/packages/maikovisky/laravel-plus
 [link-author]: https://github.com/maikovisky
 [link-contributors]: ../../contributors
