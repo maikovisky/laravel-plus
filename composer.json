@@ -16,7 +16,7 @@
         }
     ],
     "require": {
-        "illuminate/support": "~5.1",
+        "illuminate/support": "~5.2",
         "prettus/l5-repository": "2.*",
         "prettus/laravel-validation": "1.1.*",
 		"davejamesmiller/laravel-breadcrumbs": "3.*",

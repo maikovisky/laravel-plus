@@ -28,6 +28,15 @@ $ composer require maikovisky/laravel-plus
     Prettus\Repository\Providers\RepositoryServiceProvider::class,
     DaveJamesMiller\Breadcrumbs\ServiceProvider::class,
 ],
+
+...
+
+'aliases' => [
+    // ...
+    'Breadcrumbs' => DaveJamesMiller\Breadcrumbs\Facade::class,
+    //...
+],  
+
 ```
 
 
@@ -36,13 +45,13 @@ $ composer require maikovisky/laravel-plus
 Installing a layout.
 
 ``` bash
-$ php artisian layout:install 
+$ php artisan layout:install 
 ```
 
 Creating a new CRUD. Create a controller, model, repository and views (index and edit).
 
 ``` bash
-$ php artisian crud:new [Name] [tableName]
+$ php artisan crud:new [Name] [tableName]
 ```
 
 ## Change log
