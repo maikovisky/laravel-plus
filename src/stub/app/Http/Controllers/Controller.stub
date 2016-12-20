@@ -20,8 +20,8 @@ class {{Name}}Controller extends Controller
     
     public function __construct({{Name}}Repository $repository)
     {
-        $this->middleware('auth');
-        $this->middleware('acl');
+    //    $this->middleware('auth');
+    //    $this->middleware('acl');
         $this->repository = $repository;
     }
 
@@ -48,8 +48,7 @@ class {{Name}}Controller extends Controller
      */
     public function create()
     {
-        ${{name}} = new \App\Entities\{{Name}}();
-        return view("{{name}}.edit", compact('{{name}}'));
+        return view("{{name}}.create");
     }
 
     /**
@@ -86,8 +85,15 @@ class {{Name}}Controller extends Controller
      */
     public function show($id)
     {
-        //
+
+		${{name}} = $this->repository->find($id);
+        if(Request::isJson()) {
+            return ${{name}};
+        }
+        return view('{{name}}.show', compact('{{name}}'));
+
     }
+
 
     /**
      * Show the form for editing the specified resource.
@@ -97,10 +103,7 @@ class {{Name}}Controller extends Controller
      */
     public function edit($id)
     {
-        $countries = Country::lists('name', 'id');
-        $states = State::lists('name', 'id');
-        $city = $this->repository->find($id);
-        ;
+        ${{name}} = $this->repository->find($id);
         return view("{{name}}.edit", compact('{{name}}'));
     }
 
@@ -121,7 +124,7 @@ class {{Name}}Controller extends Controller
                                     ['table'=> Lang::get('general.{{Name}}')]
             ));
 
-            return Redirect::to('{{name}}');
+            return redirect('{{name}}');
 
         } catch (ValidatorException $e) {
             return Redirect::back()->withInput()
@@ -140,11 +143,11 @@ class {{Name}}Controller extends Controller
         Log::info('Delete {{name}}: '.$id);
 
         if ($this->repository->find($id)) {
-            $city = $this->repository->delete($id);
+            $this->repository->delete($id);
             Session::flash('message', Lang::get("general.deletedregister"));
         }
 
-        return Redirect::to('{{name}}');
+        return redirect('{{name}}');
     }
 
 }

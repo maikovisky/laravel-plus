@@ -48,7 +48,7 @@ Installing a layout.
 $ php artisan layout:install 
 ```
 
-Creating a new CRUD. Create a controller, model, repository and views (index and edit).
+Creating a new CRUD. Create a controller, model, repository and views (index, show and edit).
 
 ``` bash
 $ php artisan crud:new [Name] [tableName]
