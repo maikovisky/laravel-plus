@@ -12,21 +12,21 @@ use Illuminate\Support\Facades\Schema;
  *
  * @author maiko
  */
-class CrudNewCommand extends Command 
+class ScaffoldCommand extends Command 
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'crud:new {Name} {tableName}';
+    protected $signature = 'make:scaffold {Name}';
     
      /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Create a new CRUD.';
+    protected $description = 'Make a resourse controller with table, blade, repository';
     /**
      * Packager helper class.
      * @var object
@@ -36,9 +36,12 @@ class CrudNewCommand extends Command
     protected $appPath;
     protected $resourcePath;
     protected $bar;
-    protected $patterns = ['{{Name}}', '{{name}}'];
+    protected $patterns = ['{{Name}}', '{{snake_name}}', '{{camel_name}}'];
     protected $patternsValues;
-    protected $crudName;
+    protected $Name;
+    protected $snake_name;
+    protected $replaceFiles = ['index.blade.php', 'show.blade.php',
+        'create.blade.php', 'edit.blade.php'];
     
     /**
      * Create a new command instance.
@@ -154,19 +157,22 @@ class CrudNewCommand extends Command
     {
         $this->info('Creating views...');
         
-        $resourcePath = $this->resourcePath . 'views/' . strtolower($this->crudName);
-        $this->helper->makeDir($resourcePath);
-        $newIndexView = $resourcePath .'/index.blade.php';
-        $newEditView  = $resourcePath .'/edit.blade.php';
+        $resourceBlank = 'views/blank';
+        $resourcePath = 'views/' . $this->snake_name;
+        $this->helper->makeDir(resource_path($resourcePath));
         
-        if(!$this->verifyFileExists($newIndexView)) {
-            $this->helper->replaceAndSave(__DIR__.'/stub/resources/views/index.blade.stub', 
-                    $this->patterns,  $this->patternsValues, $newIndexView);
+        foreach($this->replaceFiles as $file) {
+            $newFile = resource_path($resourcePath . "/" . $file);
+            if(!$this->verifyFileExists($newFile)) {
+                $blank = resource_path($resourceBlank ."/" . $file);
+                $stub  = __DIR__.'/stub/resource/views/' . $file;
+                $changeFile = file_exists($blank) ? $blank : $stub;
+                
+                $this->helper->replaceAndSave($changeFile, $this->patterns,
+                            $this->patternsValues, $newFile);
+            }
         }
-        if(!$this->verifyFileExists($newEditView)) {
-            $this->helper->replaceAndSave(__DIR__.'/stub/resources/views/edit.blade.stub', 
-                    $this->patterns,  $this->patternsValues, $newEditView);
-        }
+        
         $this->output->progressAdvance();
     }
     
@@ -178,17 +184,37 @@ class CrudNewCommand extends Command
     public function handle()
     {
          // Start the progress bar
-        $this->output->progressStart(4);
+        $this->output->progressStart(5);
         
         $Name = $this->argument('Name');
-        $name = strtolower($Name);
-        $this->crudName = $Name;
         
-        $this->patternsValues = [$Name, $name];
+        $this->snake_name = snake_case($Name);
+        $this->camel_name = camel_case($Name);
+        $this->Name       = $Name;
+        
+        $this->patternsValues = [$this->Name, $this->snake_name, 
+            $this->camel_name];
         
         $this->appPath      = getcwd() .'/app/';
         $this->resourcePath = getcwd() .'/resources/';
-       
+
+        $this->createView();
+        return;
+//        $this->call('make:resource', ['name' => $Name]);
+        $this->output->progressAdvance();
+//        
+//        $this->call('make:repository', ['name' => $Name]);
+        $this->output->progressAdvance();
+//        
+//        $this->call('make:validator', ['name' => $Name]);
+        $this->output->progressAdvance();
+//        
+//        $this->call('make:binding', ['name' => $Name]);
+        $this->output->progressAdvance();
+        $this->call('make:migration', ['--create' => str_plural($name), 
+            'name' => "create_" . $name ."_table"]);
+        $this->output->progressAdvance();
+        return;
         $this->createController();
         $this->createRepository();  
         $this->createEntity(); 

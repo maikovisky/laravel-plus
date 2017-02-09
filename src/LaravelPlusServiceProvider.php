@@ -18,7 +18,7 @@ class LaravelPlusServiceProvider extends ServiceProvider
      * @var bool
      */
     protected $commands = [
-        'Maikovisky\LaravelPlus\CrudNewCommand',
+        'Maikovisky\LaravelPlus\ScaffoldCommand',
         'Maikovisky\LaravelPlus\LayoutInstallCommand',
     ];
     

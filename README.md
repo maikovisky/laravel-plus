@@ -48,10 +48,10 @@ Installing a layout.
 $ php artisan layout:install 
 ```
 
-Creating a new CRUD. Create a controller, model, repository and views (index, show and edit).
+Creating a new controller with model, repository and views.
 
 ``` bash
-$ php artisan crud:new [Name] [tableName]
+$ php artisan  make:scaffold [Name] 
 ```
 
 ## Change log
