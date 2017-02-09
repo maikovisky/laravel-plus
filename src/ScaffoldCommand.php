@@ -209,8 +209,8 @@ class ScaffoldCommand extends Command
         
         $this->call('make:binding', ['name' => $Name]);
         $this->output->progressAdvance();
-        $this->call('make:migration', ['--create' => str_plural($name), 
-            'name' => "create_" . $name ."_table"]);
+        $this->call('make:migration', ['--create' => str_plural($this->snake_name), 
+            'name' => "create_" . $this->snake_name ."_table"]);
         $this->output->progressAdvance();  
 
 		$this->createView();
