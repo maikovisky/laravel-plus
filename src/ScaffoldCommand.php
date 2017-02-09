@@ -198,27 +198,22 @@ class ScaffoldCommand extends Command
         $this->appPath      = getcwd() .'/app/';
         $this->resourcePath = getcwd() .'/resources/';
 
-        $this->createView();
-        return;
-//        $this->call('make:resource', ['name' => $Name]);
+        $this->call('make:resource', ['name' => $Name]);
         $this->output->progressAdvance();
-//        
-//        $this->call('make:repository', ['name' => $Name]);
+        
+        $this->call('make:repository', ['name' => $Name]);
         $this->output->progressAdvance();
-//        
-//        $this->call('make:validator', ['name' => $Name]);
+        
+        $this->call('make:validator', ['name' => $Name]);
         $this->output->progressAdvance();
-//        
-//        $this->call('make:binding', ['name' => $Name]);
+        
+        $this->call('make:binding', ['name' => $Name]);
         $this->output->progressAdvance();
         $this->call('make:migration', ['--create' => str_plural($name), 
             'name' => "create_" . $name ."_table"]);
-        $this->output->progressAdvance();
-        return;
-        $this->createController();
-        $this->createRepository();  
-        $this->createEntity(); 
-        $this->createView();
-        $this->info('Finish...');
+        $this->output->progressAdvance();  
+
+		$this->createView();
+		$this->info('Finish...');
     }
 }
