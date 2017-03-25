@@ -1,6 +1,6 @@
 
 // Home > {{snake_name}}
-Breadcrumbs::register('type_attend', function($breadcrumbs)
+Breadcrumbs::register('{{snake_name}}', function($breadcrumbs)
 {
     $breadcrumbs->parent('home');
     $breadcrumbs->push(trans('general.{{Name}}'), route('{{snake_name}}.index'));
