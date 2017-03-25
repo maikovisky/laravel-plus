@@ -5,7 +5,7 @@ namespace Maikovisky\LaravelPlus;
 use Illuminate\Console\Command;
 use Maikovisky\LaravelPlus\PackagerHelper;
 use Illuminate\Support\Facades\Schema;
-
+use Illuminate\Filesystem\Filesystem;
 
 /**
  * Description of CrudNewCommand
@@ -36,7 +36,8 @@ class ScaffoldCommand extends Command
     protected $appPath;
     protected $resourcePath;
     protected $bar;
-    protected $patterns = ['{{Name}}', '{{snake_name}}', '{{camel_name}}'];
+    protected $patterns = ['{{Name}}', '{{snake_name}}', '{{camel_name}}', 
+        '{{camel_name_plural}}'];
     protected $patternsValues;
     protected $Name;
     protected $snake_name;
@@ -63,94 +64,57 @@ class ScaffoldCommand extends Command
         return false;
     }
     
-    protected function createController() 
-    {
-        $this->info('Creating controller...');
-        
-        $controllerPath = $this->appPath . 'Http/Controllers';
-        $newController  = $controllerPath.'/'.$this->crudName.'Controller.php';
-        
-        if(!$this->verifyFileExists($newController)) {       
-            $this->helper->replaceAndSave(__DIR__.'/stub/app/Http/Controllers/Controller.stub', 
-                    $this->patterns,  $this->patternsValues, $newController);
-        }
-        
-        $this->output->progressAdvance();
+    protected function modifyController() {
 
+        $srcFile = __DIR__.'/stub/app/Http/Controllers/Controller_create.php';
+        $ctlFile = app_path('Http/Controllers/' . str_plural($this->Name) . 'Controller.php');
+        $file = new Filesystem();
+        //$newSrc = preg_replace("/\s+\/\*\*\n.*Store/", $src . "\n\r$0", $oldSrc);
+        
+        $src = $file->get($srcFile);
+        $oldSrc = $file->get($ctlFile);
+
+        // Fix miss create
+        $newSrc = preg_replace("/\s+\/\*\*\n.*Store/", "\n\r" .$src . "\n\r$0", $oldSrc);
+        $newSrc = str_replace($this->patterns, $this->patternsValues, $newSrc);
+        
+        // Fix views
+        $newSrc = str_replace($this->camel_name_plural . ".", $this->snake_name . ".", $newSrc);
+        
+        // Fix controller in update
+        $newSrc = str_replace('update($id, $request->all())', 
+                'update($request->all(), $id)' , $newSrc);
+        $file->put($ctlFile, $newSrc);
+        
     }
     
-    protected function createRepository()
-    {
+    protected function createBreadcrumbs() {
         
-        $this->info('Creating repository...');
+        $this->info('Add Breadcrumbs...');
         
-        $repositoriesPath = $this->appPath . 'Repositories';
-        $this->helper->makeDir($repositoriesPath);
+        $srcFile = __DIR__.'/stub/routes/breadcrumbs.php';
+        $breFile = base_path('routes/breadcrumbs.php');
         
-        $newRepository = $repositoriesPath.'/'.$this->crudName.'Repository.php';
-        $newRepositoryEloquent = $repositoriesPath.'/'.$this->crudName.'RepositoryEloquent.php';
+        $file = new Filesystem();
+        $src = $file->get($srcFile);
+        $src = str_replace($this->patterns, $this->patternsValues, $src);
         
-        if(!$this->verifyFileExists($newRepository)) {
-           $this->helper->replaceAndSave(__DIR__.'/stub/app/Repositories/Repository.stub', 
-                    $this->patterns,  $this->patternsValues, $newRepository); 
-        }
+        $bre = $file->get($breFile);
         
-        if(!$this->verifyFileExists($newRepositoryEloquent)) {
-            $this->helper->replaceAndSave(__DIR__.'/stub/app/Repositories/RepositoryEloquent.stub', 
-                    $this->patterns,  $this->patternsValues, $newRepositoryEloquent);
-        }
+        $file->put($breFile, $bre . $src);
         
-        $this->output->progressAdvance();
     }
-
-    protected function createEntity()
+    
+    protected function fixRequest()
     {
-        $tableName = $this->argument('tableName');
-        $columns = Schema::getColumnListing($tableName);
-        $entitiesPath = $this->appPath . 'Entities';
+        $filename_create = app_path('Http/Requests/' . $this->Name . "CreateRequest.php");
+        $filename_update = app_path('Http/Requests/' . $this->Name . "UpdateRequest.php");
         
-        $this->info('Creating entity...');
-        $this->helper->makeDir($entitiesPath);
-        $newEntity = $entitiesPath.'/'.$this->crudName.'.php';
+        $this->helper->replaceAndSave($filename_create, "return false;",
+                "return true;", $filename_create);
         
-        $columns = array_diff($columns, ['id']);
-        
-        // Verify if exist softdelete in table
-        if(in_array('deleted_at', $columns)) 
-        {
-           $this->info('Softdelete detected...');
-           $columns = array_diff($columns, ['deleted_at']);
-           $softDelete = 'TransformableTrait, SoftDeletes';
-        }
-        else 
-        {
-            $softDelete = 'TransformableTrait';
-        }
-        
-        if(in_array('created_at', $columns)) {
-           $this->info('Created and updated control detected...');
-           $columns = array_diff($columns, ['created_at', 'updated_at']);
-           $timestamps = '$timestamps = true';
-        }
-        else {
-           $timestamps = '$timestamps = false';
-        }
-        
-        if(in_array('password', $columns))
-        {
-            $columns = array_diff($columns, ['remember_token']);
-            $hidden  = 'protected $hidden = [\'password\', \'remember_token\'];';
-        }
-
-        $fillable = "\$fillable = ['". implode("','",$columns) . "']";
-        if(!$this->verifyFileExists($newEntity)) {
-            $this->helper->replaceAndSave(__DIR__.'/stub/app/Entities/Entity.stub', 
-                 $this->patterns,  $this->patternsValues, $newEntity);
-            $this->helper->replaceAndSave($newEntity, '$fillable', $fillable, $newEntity);
-            $this->helper->replaceAndSave($newEntity, '$timestamps = false', $timestamps, $newEntity);
-            $this->helper->replaceAndSave($newEntity, 'TransformableTrait', $softDelete, $newEntity);
-        }
-        $this->output->progressAdvance();
+        $this->helper->replaceAndSave($filename_update, "return false;",
+                "return true;", $filename_update);
     }
 
     protected function createView()
@@ -190,15 +154,18 @@ class ScaffoldCommand extends Command
         
         $this->snake_name = snake_case($Name);
         $this->camel_name = camel_case($Name);
+        $this->camel_name_plural = str_plural(camel_case($Name));
         $this->Name       = $Name;
         
         $this->patternsValues = [$this->Name, $this->snake_name, 
-            $this->camel_name];
+            $this->camel_name, $this->camel_name_plural];
+        
         
         $this->appPath      = getcwd() .'/app/';
         $this->resourcePath = getcwd() .'/resources/';
 
         $this->call('make:resource', ['name' => $Name]);
+        $this->modifyController();
         $this->output->progressAdvance();
         
         $this->call('make:repository', ['name' => $Name]);
@@ -209,8 +176,9 @@ class ScaffoldCommand extends Command
         
         $this->call('make:binding', ['name' => $Name]);
         $this->output->progressAdvance();
-        $this->call('make:migration', ['--create' => str_plural($this->snake_name), 
-            'name' => "create_" . $this->snake_name ."_table"]);
+        
+        $this->createBreadcrumbs();
+        $this->fixRequest();
         $this->output->progressAdvance();  
 
 		$this->createView();

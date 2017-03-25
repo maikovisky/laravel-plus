@@ -1,0 +1,37 @@
+@extends('layouts.default')
+@extends('layouts.edit')
+
+@section('title')
+<h1>{{Lang::get("general.{{Name}}")}}</h1>
+@stop
+
+@section('sub-title')
+@if (${{name}}->id)
+{{${{name}}->name}}
+@else
+{{Lang::get("general.{{name}}")}}
+@endif
+@stop
+
+@section('breadcrumbs', Breadcrumbs::render('{{name}}.edit', ${{name}}))
+
+@section('edit')
+
+@if (!${{name}}->id)
+{!! Form::open(array('route' => '{{name}}.store')) !!}
+@else
+{!! Form::model('${{name}}', [
+        'method'=>'PUT',
+        'route' => ['{{name}}.update',${{name}}->id]
+    ]) !!}
+@endif
+    <div class="form-group col-lg-12">
+        {!!Form::label('name', Lang::get('general.{{name}}'))!!}
+        {!!Form::text('name', ${{name}}->name, array('class' => 'form-control'))!!}
+    </div>
+
+    <button type="submit" class="btn btn-primary">{{Lang::get('general.Submit')}}</button>
+    <button type="reset" class="btn btn-primary">{{Lang::get('general.Reset')}}</button>
+{!! Form::close() !!}
+
+@stop
